@@ -1,0 +1,126 @@
+#!/usr/bin/perl
+our $VERSION = '0.042';
+use strict;
+use utf8; # ار
+use open ':utf8';
+
+use Syntax::Highlight::Engine::Kate;
+use Term::ExtendedColor qw(:attributes);
+use IO::File;
+
+my $hl = new Syntax::Highlight::Engine::Kate(
+    language      => 'Perl',
+
+    substitutions => {
+      '.'   => bold('.'),
+      ','   => bold(','),
+      '?'   => bold('?'),
+      '!'   => bold('!'),
+      '['   => fg('red3' ,bold('[')),
+      ']'   => fg('red3', bold(']')),
+      '('   => fg(250, bold('(')),
+      ')'   => fg(250, bold(')')),
+      '='   => bold('='),
+      '>'   => bold('>'),
+      '<'   => bold('<'),
+    },
+
+    format_table  => {
+        Alert        => [ fg(148), clear() ],
+        BaseN        => [ fg(196), clear() ],
+        BString      => [ fg(100), clear() ],
+        Char         => [ fg(111), clear() ],
+        Comment      => [ fg(137). italic(), clear() ],
+        DataType     => [ fg(148), clear() ],
+        DecVal       => [ fg(240), clear() ],
+        Error        => [ fg(160), clear() ],
+        Float        => [ fg(135). bold(), clear() ],
+        Function     => [ fg(202), clear() ],
+        IString      => [ fg(179), clear() ],
+        Keyword      => [ fg(244). bold(), clear() ],
+        Normal       => [      "", ""      ],
+        Operator     => [ fg(148), clear() ],
+        Others       => [ fg(225), clear() ],
+        RegionMarker => [ fg(246), clear() ],
+        Reserved     => [ fg(178), clear() ],
+        String       => [ fg(143), clear() ],
+        Variable     => [ fg(148), clear() ],
+        Warning      => [ fg(160), clear() ],
+    },
+);
+
+my $fh;
+my $file = shift @ARGV;
+if ( !$file || $file eq '-' ) {
+    binmode STDIN;
+    $fh = \*STDIN;
+}
+else {
+    $fh = IO::File->new($file)
+        || die "Cannot open file: $file: $!";
+}
+
+while ( my $line = <$fh> ) {
+    print $hl->highlightText($line);
+};
+
+
+__END__
+
+
+=pod
+
+=head1 NAME
+
+skate - cat with Kate syntax highlighting
+
+=head1 USAGE
+
+  skate [FILE..]
+
+=head1 DESCRIPTION
+
+B<skate> uses the syntax definitions from the Kate editor and extended colors to
+view source code in proper color in the terminal.
+
+=head1 PREREQUISITIES
+
+The L<Term::ExtendedColor> and L<Syntax::Highlight::Engine::Kate> Perl modules.
+
+A terminal that support 256 colors.
+
+Code to skate!
+
+=head1 REPORTING BUGS
+
+Report bugs and/or feature requests on rt.cpan.org, the repository issue tracker
+or directly to L<magnus@trapd00r.se>
+
+=head1 AUTHOR
+
+  Magnus Woldrich
+  CPAN ID: WOLDRICH
+  magnus@trapd00r.se
+  http://japh.se
+
+=head1 CONTRIBUTORS
+
+None required yet.
+
+=head1 COPYRIGHT
+
+Copyright 2011 B<THIS APPLICATION>s L</AUTHOR> and L</CONTRIBUTORS> as listed
+above.
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Syntax::Highlight::Engine::Kate>, L<Term::ExtendedColor>
+
+=cut
+
+# vim: set ts=2 et sw=2:
