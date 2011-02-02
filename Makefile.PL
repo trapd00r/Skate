@@ -14,7 +14,7 @@ WriteMakefile1(
 
     NAME                => q[App::Skate],
     AUTHOR              => q[Magnus Woldrich <trapd00r@trapd00r.se>],
-    ABSTRACT            => q[Colorize input filenames just like ls does],
+    ABSTRACT            => q[Cat with syntax highlighting powers],
     VERSION_FROM        => q[./skate],
     LICENSE             => q[perl],
     PL_FILES            => {},
