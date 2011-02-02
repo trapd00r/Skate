@@ -1,67 +1,71 @@
 #!/usr/bin/perl
-our $VERSION = '0.042';
+our $VERSION = '0.054';
 use strict;
-use utf8; # ار
-use open ':utf8';
 
 use Syntax::Highlight::Engine::Kate;
 use Term::ExtendedColor qw(:attributes);
-use IO::File;
+use Getopt::Long qw(GetOptions);
+use Pod::Usage qw(pod2usage);
 
-my $hl = new Syntax::Highlight::Engine::Kate(
-    language      => 'Perl',
-
-    substitutions => {
-      '.'   => bold('.'),
-      ','   => bold(','),
-      '?'   => bold('?'),
-      '!'   => bold('!'),
-      '['   => fg('red3' ,bold('[')),
-      ']'   => fg('red3', bold(']')),
-      '('   => fg(250, bold('(')),
-      ')'   => fg(250, bold(')')),
-      '='   => bold('='),
-      '>'   => bold('>'),
-      '<'   => bold('<'),
-    },
-
-    format_table  => {
-        Alert        => [ fg(148), clear() ],
-        BaseN        => [ fg(196), clear() ],
-        BString      => [ fg(100), clear() ],
-        Char         => [ fg(111), clear() ],
-        Comment      => [ fg(137). italic(), clear() ],
-        DataType     => [ fg(148), clear() ],
-        DecVal       => [ fg(240), clear() ],
-        Error        => [ fg(160), clear() ],
-        Float        => [ fg(135). bold(), clear() ],
-        Function     => [ fg(202), clear() ],
-        IString      => [ fg(179), clear() ],
-        Keyword      => [ fg(244). bold(), clear() ],
-        Normal       => [      "", ""      ],
-        Operator     => [ fg(148), clear() ],
-        Others       => [ fg(225), clear() ],
-        RegionMarker => [ fg(246), clear() ],
-        Reserved     => [ fg(178), clear() ],
-        String       => [ fg(143), clear() ],
-        Variable     => [ fg(148), clear() ],
-        Warning      => [ fg(160), clear() ],
-    },
+my $language = 'perl';
+GetOptions(
+  'l|language:s' => \$language,
+  'h|help'       => sub { pod2usage(verbose => 1)   and exit 0; },
+  'm|man'        => sub { pod2usage(verbose => 3)   and exit 0; },
+  'v|version'    => sub { print "skate v$VERSION\n" and exit 0; },
 );
 
-my $fh;
-my $file = shift @ARGV;
-if ( !$file || $file eq '-' ) {
-    binmode STDIN;
-    $fh = \*STDIN;
+
+my $hl = new Syntax::Highlight::Engine::Kate(
+  language      => ucfirst(lc($language)),
+
+  substitutions => {
+    '.'   => bold('.'),
+    ','   => bold(','),
+    '?'   => bold('?'),
+    '!'   => fg('red1', bold('!')),
+    '('   => fg(250, bold('(')),
+    ')'   => fg(250, bold(')')),
+    '='   => bold('='),
+    '>'   => bold('>'),
+    '<'   => bold('<'),
+  },
+
+  format_table  => {
+      Alert        => [ fg(148), clear() ],
+      BaseN        => [ fg(196), clear() ],
+      BString      => [ fg(100), clear() ],
+      Char         => [ fg(111), clear() ],
+      Comment      => [ fg(137). italic(), clear() ],
+      DataType     => [ fg(148), clear() ],
+      DecVal       => [ fg(240), clear() ],
+      Error        => [ fg(160), clear() ],
+      Float        => [ fg(135). bold(), clear() ],
+      Function     => [ fg(202), clear() ],
+      IString      => [ fg(179), clear() ],
+      Keyword      => [ fg(244). bold(), clear() ],
+      Normal       => [      "", ""      ],
+      Operator     => [ fg(148), clear() ],
+      Others       => [ fg(225), clear() ],
+      RegionMarker => [ fg(246), clear() ],
+      Reserved     => [ fg(178), clear() ],
+      String       => [ fg(143), clear() ],
+      Variable     => [ fg(148), clear() ],
+      Warning      => [ fg(160), clear() ],
+  },
+);
+
+my($file, $fh) = (shift, undef);
+
+if( (!defined($file)) or ($file eq '-') ) {
+  $fh = \*STDIN;
 }
 else {
-    $fh = IO::File->new($file)
-        || die "Cannot open file: $file: $!";
+  open($fh, '<', $file) or die("Cannot open '$file': $!\n");
 }
 
-while ( my $line = <$fh> ) {
-    print $hl->highlightText($line);
+while(my $line = <$fh>) {
+  print $hl->highlightText($line);
 };
 
 
@@ -76,12 +80,20 @@ skate - cat with Kate syntax highlighting
 
 =head1 USAGE
 
-  skate [FILE..]
+  skate [OPTION]... [FILE]...
 
 =head1 DESCRIPTION
 
 B<skate> uses the syntax definitions from the Kate editor and extended colors to
 view source code in proper color in the terminal.
+
+=head1 OPTIONS
+
+  -l,   --language    language definition
+
+  -h,   --help        show the help and exit
+  -v,   --version     show version info and exit
+  -m,   --man         show the manual and exit
 
 =head1 PREREQUISITIES
 
